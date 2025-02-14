@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitchie Party RSVP</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input, button { margin: 10px; padding: 10px; }
+        #rsvp-form, #login-form, #messenger { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Mitchie Party RSVP</h1>
+    
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <div id="rsvp-form">
+        <h2>RSVP Form</h2>
+        <input type="text" id="name" placeholder="Your Name">
+        <input type="text" id="phone" placeholder="Your Phone Number">
+        <input type="text" id="plusOneName" placeholder="Plus One Name (Optional)">
+        <input type="text" id="plusOnePhone" placeholder="Plus One Phone (Optional)">
+        <button onclick="submitRSVP()">Submit RSVP</button>
+    </div>
+    
+    <div id="messenger">
+        <h2>Send Invitation</h2>
+        <input type="text" id="guestPhone" placeholder="Guest Phone Number">
+        <textarea id="inviteMessage" placeholder="Your Invitation Message"></textarea>
+        <button onclick="sendMessage()">Send Invite</button>
+    </div>
+    
+    <script>
+        let token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById("login-form").style.display = "block";
+        } else {
+            document.getElementById("rsvp-form").style.display = "block";
+            document.getElementById("messenger").style.display = "block";
+        }
+
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            fetch('https://mitchie-party-rsvp.onrender.com/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    location.reload();
+                } else {
+                    alert("Login failed");
+                }
+            });
+        }
+
+        function submitRSVP() {
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const plusOneName = document.getElementById("plusOneName").value;
+            const plusOnePhone = document.getElementById("plusOnePhone").value;
+            fetch('https://mitchie-party-rsvp.onrender.com/rsvps', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ name, phone, plusOne: { name: plusOneName, phone: plusOnePhone } })
+            }).then(response => response.json()).then(alert("RSVP Submitted!"));
+        }
+
+        function sendMessage() {
+            const phone = document.getElementById("guestPhone").value;
+            const message = document.getElementById("inviteMessage").value;
+            fetch('https://mitchie-party-rsvp.onrender.com/send-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ phone, message })
+            }).then(response => response.json()).then(alert("Message Sent!"));
+        }
+    </script>
+</body>
+</html>
