@@ -1,3 +1,8 @@
+app.use((req, res, next) => {
+    console.log("Incoming Headers:", req.headers);
+    next();
+});
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
