@@ -12,26 +12,36 @@
             background-color: #f8f8f8;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
         }
-        input, button, textarea {
+        .banner {
             width: 100%;
-            margin: 10px 0;
-            padding: 10px;
+            height: 200px;
+            background: url('https://source.unsplash.com/1200x400/?party,celebration') center/cover;
+            border-radius: 10px 10px 0 0;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .event-details {
+            font-size: 18px;
+            color: #555;
         }
         .rsvp-options button {
             width: 30%;
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px;
-            margin: 5px;
+            padding: 15px;
+            margin: 10px;
             cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
         }
         .rsvp-options button.maybe {
             background-color: #FFC107;
@@ -42,14 +52,17 @@
         .guest-list {
             margin-top: 20px;
             text-align: left;
+            padding: 10px;
+            background: #f1f1f1;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="banner"></div>
         <h1>Mitchie Party RSVP</h1>
-        <p><strong>Date:</strong> TBD</p>
-        <p><strong>Location:</strong> TBD</p>
+        <p class="event-details"><strong>Date:</strong> TBD | <strong>Location:</strong> TBD</p>
         <p>Join us for an unforgettable event! Let us know if you'll be there.</p>
         
         <h2>Will you be attending?</h2>
@@ -67,7 +80,13 @@
 
     <script>
         function submitRSVP(response) {
-            alert(`You selected: ${response}`);
+            const guestList = document.getElementById("guest-list");
+            if (guestList.innerHTML.includes("No RSVPs yet")) {
+                guestList.innerHTML = "";
+            }
+            const listItem = document.createElement("li");
+            listItem.textContent = `Someone RSVP'd: ${response}`;
+            guestList.appendChild(listItem);
         }
     </script>
 </body>
