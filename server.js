@@ -1,60 +1,75 @@
-app.use((req, res, next) => {
-    console.log("Incoming Headers:", req.headers);
-    next();
-});
-
+// Import necessary modules
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
 
+// Load environment variables from .env file
+dotenv.config();
+
+// Initialize Express app
 const app = express();
+
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const SECRET_KEY = "mitchie_secret_1234"; // Make sure this matches your JWT verification
+// MongoDB Connection
+const mongoURI = process.env.MONGO_URI || "your_mongodb_connection_string_here";
 
-// Endpoint for user login (generates token)
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
+mongoose.connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => console.log("MongoDB Connected"))
+.catch((err) => console.log("MongoDB Connection Error:", err));
 
-    if (username === "mitchie" && password === "legends123") {
-        const token = jwt.sign(
-            { user: "mitchie", exp: Math.floor(Date.now() / 1000) + (60 * 60) }, // Expires in 1 hour
-            SECRET_KEY
-        );
-        res.json({ token });
-    } else {
-        res.status(401).json({ error: "Invalid credentials" });
-    }
+// Define a simple User Schema for authentication
+const userSchema = new mongoose.Schema({
+    username: String,
+    password: String,
 });
 
-// Middleware to verify token
-const verifyToken = (req, res, next) => {
-    const token = req.headers["authorization"];
-    
-    if (!token) {
-        return res.status(403).json({ error: "No token provided" });
+const User = mongoose.model("User", userSchema);
+
+// Secret key for JWT
+const JWT_SECRET = process.env.JWT_SECRET || "mitchie_secret_1234";
+
+// Login Route
+app.post("/login", async (req, res) => {
+    const { username, password } = req.body;
+
+    if (username !== "mitchie" || password !== "legends123") {
+        return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const formattedToken = token.replace("Bearer ", ""); // Ensures proper formatting
+    // Generate JWT Token (expires in 1 hour)
+    const token = jwt.sign({ user: "mitchie" }, JWT_SECRET, { expiresIn: "1h" });
 
-    jwt.verify(formattedToken, SECRET_KEY, (err, decoded) => {
-        if (err) {
-            return res.status(500).json({ error: "Failed to authenticate token" });
-        }
-        req.user = decoded.user;
+    res.json({ token });
+});
+
+// Middleware to verify JWT Token
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) return res.status(401).json({ error: "No token provided" });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: "Failed to authenticate token" });
+
+        req.user = user;
         next();
     });
 };
 
-// Protected route to fetch RSVPs
-app.get("/rsvps", verifyToken, (req, res) => {
-    res.json({ message: "Success! You are authenticated.", user: req.user });
+// Protected Route: Fetch RSVP List (Requires Authentication)
+app.get("/rsvps", authenticateToken, (req, res) => {
+    res.json({ message: "Welcome Mitchie! RSVP data would be here." });
 });
 
-// Start the server
+// Set up server to listen on port
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
