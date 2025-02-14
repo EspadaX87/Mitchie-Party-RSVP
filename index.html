@@ -22,7 +22,9 @@
         .banner {
             width: 100%;
             height: 200px;
-            background: url('https://source.unsplash.com/1200x400/?party,celebration') center/cover;
+            background-image: url('https://source.unsplash.com/1200x400/?party,celebration');
+            background-size: cover;
+            background-position: center;
             border-radius: 10px 10px 0 0;
         }
         h1 {
@@ -56,6 +58,13 @@
             background: #f1f1f1;
             border-radius: 5px;
         }
+        .rsvp-form input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +75,10 @@
         <p>Join us for an unforgettable event! Let us know if you'll be there.</p>
         
         <h2>Will you be attending?</h2>
+        <div class="rsvp-form">
+            <input type="text" id="name" placeholder="Enter your name">
+            <input type="text" id="phone" placeholder="Enter your phone number">
+        </div>
         <div class="rsvp-options">
             <button onclick="submitRSVP('Yes')">Yes ✅</button>
             <button class="maybe" onclick="submitRSVP('Maybe')">Maybe 🤔</button>
@@ -80,13 +93,23 @@
 
     <script>
         function submitRSVP(response) {
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            if (!name || !phone) {
+                alert("Please enter your name and phone number before RSVPing.");
+                return;
+            }
+            
             const guestList = document.getElementById("guest-list");
             if (guestList.innerHTML.includes("No RSVPs yet")) {
                 guestList.innerHTML = "";
             }
             const listItem = document.createElement("li");
-            listItem.textContent = `Someone RSVP'd: ${response}`;
+            listItem.textContent = `${name} (${phone}) RSVP'd: ${response}`;
             guestList.appendChild(listItem);
+            
+            document.getElementById("name").value = "";
+            document.getElementById("phone").value = "";
         }
     </script>
 </body>
