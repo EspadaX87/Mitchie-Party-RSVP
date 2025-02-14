@@ -5,91 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mitchie Party RSVP</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input, button { margin: 10px; padding: 10px; }
-        #rsvp-form, #login-form, #messenger { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        input, button, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        .rsvp-options button {
+            width: 30%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .rsvp-options button.maybe {
+            background-color: #FFC107;
+        }
+        .rsvp-options button.no {
+            background-color: #F44336;
+        }
+        .guest-list {
+            margin-top: 20px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
-    <h1>Mitchie Party RSVP</h1>
-    
-    <div id="login-form">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
+    <div class="container">
+        <h1>Mitchie Party RSVP</h1>
+        <p><strong>Date:</strong> TBD</p>
+        <p><strong>Location:</strong> TBD</p>
+        <p>Join us for an unforgettable event! Let us know if you'll be there.</p>
+        
+        <h2>Will you be attending?</h2>
+        <div class="rsvp-options">
+            <button onclick="submitRSVP('Yes')">Yes ✅</button>
+            <button class="maybe" onclick="submitRSVP('Maybe')">Maybe 🤔</button>
+            <button class="no" onclick="submitRSVP('No')">No ❌</button>
+        </div>
+
+        <h3>Guest List</h3>
+        <ul id="guest-list" class="guest-list">
+            <li>No RSVPs yet.</li>
+        </ul>
     </div>
-    
-    <div id="rsvp-form">
-        <h2>RSVP Form</h2>
-        <input type="text" id="name" placeholder="Your Name">
-        <input type="text" id="phone" placeholder="Your Phone Number">
-        <input type="text" id="plusOneName" placeholder="Plus One Name (Optional)">
-        <input type="text" id="plusOnePhone" placeholder="Plus One Phone (Optional)">
-        <button onclick="submitRSVP()">Submit RSVP</button>
-    </div>
-    
-    <div id="messenger">
-        <h2>Send Invitation</h2>
-        <input type="text" id="guestPhone" placeholder="Guest Phone Number">
-        <textarea id="inviteMessage" placeholder="Your Invitation Message"></textarea>
-        <button onclick="sendMessage()">Send Invite</button>
-    </div>
-    
+
     <script>
-        let token = localStorage.getItem('token');
-        if (!token) {
-            document.getElementById("login-form").style.display = "block";
-        } else {
-            document.getElementById("rsvp-form").style.display = "block";
-            document.getElementById("messenger").style.display = "block";
-        }
-
-        function login() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            fetch('https://mitchie-party-rsvp.onrender.com/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    location.reload();
-                } else {
-                    alert("Login failed");
-                }
-            });
-        }
-
-        function submitRSVP() {
-            const name = document.getElementById("name").value;
-            const phone = document.getElementById("phone").value;
-            const plusOneName = document.getElementById("plusOneName").value;
-            const plusOnePhone = document.getElementById("plusOnePhone").value;
-            fetch('https://mitchie-party-rsvp.onrender.com/rsvps', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ name, phone, plusOne: { name: plusOneName, phone: plusOnePhone } })
-            }).then(response => response.json()).then(alert("RSVP Submitted!"));
-        }
-
-        function sendMessage() {
-            const phone = document.getElementById("guestPhone").value;
-            const message = document.getElementById("inviteMessage").value;
-            fetch('https://mitchie-party-rsvp.onrender.com/send-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ phone, message })
-            }).then(response => response.json()).then(alert("Message Sent!"));
+        function submitRSVP(response) {
+            alert(`You selected: ${response}`);
         }
     </script>
 </body>
